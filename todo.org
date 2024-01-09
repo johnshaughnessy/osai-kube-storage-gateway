@@ -1,0 +1,97 @@
+* osai-kube-storage-gateway todo list
+
+** TODO Evaluate and Document Storage Needs
+
+ Estimate size, type, and number of objects expected. Consider read/write access patterns.
+
+** TODO Choose GCS Bucket Storage Class
+
+ Select between Standard, Nearline, Coldline, or Archive based on data access needs.
+
+** TODO Configure GCS Buckets
+
+ Create buckets in GCS, setting appropriate locations and permissions.
+
+** TODO Define IAM Roles
+
+ Create specific IAM roles for access control to GCS with the principle of least privilege.
+
+** TODO Create GCP Service Accounts
+
+ Set up service accounts for your application, assigning necessary IAM roles.
+
+** TODO Design PostgreSQL Schema
+
+ Draft a schema for your database, focusing on tables for user data, access control, and object metadata.
+
+** TODO Install PostgreSQL
+
+ Choose between local Kubernetes deployment or cloud-based service. Install and initialize.
+
+** TODO Develop User and Project Access Control Logic
+
+ Code the logic for handling user and project-specific access, preparing for integration with Keycloak.
+
+** TODO Write Dockerfile
+
+ Craft a Dockerfile with Rust environment, including actix_web, diesel, and cloud-storage libraries.
+
+** TODO Code Basic Web Server Structure
+
+ Start with a basic Rust application structure using actix_web.
+
+** TODO Set up Database Connection
+
+ Integrate the PostgreSQL database with your Rust application using diesel.
+
+** TODO Implement GCS Integration
+
+ Develop functionality in your application for interacting with GCS (authentication, uploading, downloading).
+
+** TODO Create Basic API Endpoints
+
+ Start with primary endpoints for your object storage operations (e.g., POST for upload, GET for download).
+
+** TODO Test Keycloak Integration
+
+ Implement a test integration with Keycloak for authentication, using a mock endpoint.
+
+** TODO Draft Kubernetes Deployment Manifest
+
+ Write a basic deployment manifest for Kubernetes, including necessary environment variables.
+
+** TODO Prepare Keycloak Client Setup
+
+ Configure a client in Keycloak for your application with necessary scopes and roles.
+
+** TODO Unit Test Core Functions
+
+ Write and run unit tests for core functionalities like database interaction, GCS integration, and access control logic.
+
+** TODO Build Initial Docker Image
+
+ Build and test the Docker image locally to ensure all components are properly included.
+
+** TODO Set Up Basic CI/CD Workflow
+
+ Create a simple GitHub Actions workflow for build and test automation.
+
+** TODO Perform Initial Database Migration
+
+ Run the first database migration to set up your initial schema.
+
+** TODO Deploy Initial Version to Kubernetes
+
+ Deploy your application to Kubernetes and verify basic connectivity and functionality.
+
+** TODO Integrate Application with osai-kube
+
+ Ensure your new service communicates correctly with existing services in the osai-kube ecosystem.
+
+** TODO Refine API Endpoints
+
+ Expand and refine your API based on initial testing and requirements.
+
+** TODO Optimize Dockerfile and Kubernetes Manifests
+
+ Iterate on your Dockerfile and Kubernetes manifests for efficiency and best practices.
