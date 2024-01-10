@@ -1,0 +1,17 @@
+FROM rust:1.75-slim-buster
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    pkg-config \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/src/storage-gateway
+
+RUN cargo install cargo-watch
+
+COPY . .
+
+RUN cargo build
+CMD ["cargo", "watch", "-x", "run"]

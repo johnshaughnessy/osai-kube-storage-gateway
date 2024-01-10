@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  storage-gateway:
+    build:
+      context: ../storage-gateway/
+      dockerfile: ../storage-gateway/Dockerfile.dev
+    volumes:
+      - ../storage-gateway:/usr/src/storage-gateway
+    environment:
+      - DATABASE_URL=postgres://storage-gateway:password@postgres:5432/storage_gateway_dev
+    depends_on:
+      - postgres
+    networks:
+      - storage-gateway-network
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: storage_gateway_dev
+      POSTGRES_USER: storage_gateway
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - storage-gateway-network
+
+volumes:
+  postgres_data:
+
+networks:
+  storage-gateway-network:
+    name: storage-gateway-network
+    driver: bridge
