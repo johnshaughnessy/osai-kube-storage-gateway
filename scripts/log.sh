@@ -1,4 +1,4 @@
-# log.sh
+# #!/bin/bash
 #
 # Source this file to use the log function.
 
