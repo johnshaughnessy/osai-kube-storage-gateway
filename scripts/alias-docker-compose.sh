@@ -1,10 +1,15 @@
 #!/bin/bash
 #
-# Alias for docker-compose, setting the correct compose file.
+# Function for docker-compose, setting the correct compose file.
 #
 # Source this file: source alias-docker-compose.sh
 #
-# Then use the alias: dc ps, dc up, dc down, etc.
+# Then use the function: dc ps, dc up, dc down, etc.
 
 SCRIPT_DIR="$(dirname "$0")"
-alias dc="docker compose -f $SCRIPT_DIR/docker-compose.dev.yaml"
+
+function dc {
+    HOST_UID=$(id -u)
+    HOST_GID=$(id -g)
+    docker compose -f "$SCRIPT_DIR/docker-compose.dev.yaml" "$@"
+}

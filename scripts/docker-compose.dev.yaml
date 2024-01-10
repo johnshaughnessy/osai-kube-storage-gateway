@@ -8,8 +8,11 @@ services:
       - ../storage-gateway:/usr/src/storage-gateway
     environment:
       - DATABASE_URL=postgres://storage-gateway:password@postgres:5432/storage_gateway_dev
+      - USER_ID=${HOST_UID:-1000}
+      - GROUP_ID=${HOST_GID:-1000}
     depends_on:
       - postgres
+
     networks:
       - storage-gateway-network
 
