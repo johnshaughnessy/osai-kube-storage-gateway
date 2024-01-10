@@ -1,12 +1,48 @@
 * osai-kube-storage-gateway todo list
 
-** TODO Evaluate and Document Storage Needs
+** DONE Evaluate and Document Storage Needs
 
  Estimate size, type, and number of objects expected. Consider read/write access patterns.
 
-** TODO Choose GCS Bucket Storage Class
+ For v1, I just want to be able to read/write images from the various apps running in the cluster. I suspect I'll request 1-30 images at a time. I don't think I'll need to store videos. I might want to store text or json files when working with LLM's, but I may store that in a database rather than object storage. I won't worry about this yet.
+
+** DONE Choose GCS Bucket Storage Class
 
  Select between Standard, Nearline, Coldline, or Archive based on data access needs.
+
+ I already have a bucket set up. I'll use that one. I did read about these options though:
+
+ #+begin_src md
+# Edit default storage class
+
+Changing this bucket's default storage class will affect objects uploaded after you save the new storage class. To change current objects' storage classes, use gsutil or the Cloud Storage API. Learn more
+
+# Autoclass
+
+Automatically transitions each object to Standard or Nearline class based on object-level activity, to optimize for cost and latency. Recommended if usage frequency may be unpredictable. Can be changed to a default class at any time. Pricing details
+
+# Set a default class
+
+Applies to all objects in your bucket unless you manually modify the class per object or set object lifecycle rules. Best when your usage is highly predictable. Can't be changed to Autoclass once the bucket is created.
+
+## Standard
+
+Best for short-term storage and frequently accessed data
+
+## Nearline
+
+Best for backups and data accessed less than once a month
+
+## Coldline
+
+Best for disaster recovery and data accessed less than once a quarter
+
+## Archive
+
+Best for long-term digital preservation of data accessed less than once a year
+ #+end_src
+
+
 
 ** TODO Configure GCS Buckets
 
