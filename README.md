@@ -44,3 +44,5 @@ The database is not automatically created. Instead, a container called `migratio
 You can use `migration-runner` to run migrations manually. You may need to shut down `storage-gateway` first, because `postgres` may disallow certain operations if there are active connections to the database.
 
 After bringing up the dev environment (`dc up -d`), connect to the `migration-runner` container and run:
+
+# TODO
