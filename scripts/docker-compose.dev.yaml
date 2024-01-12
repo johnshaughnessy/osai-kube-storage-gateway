@@ -6,8 +6,8 @@ services:
       dockerfile: ../storage-gateway/Dockerfile.dev
     volumes:
       - ../storage-gateway:/usr/src/storage-gateway
+      - ../example-secrets/storage-gateway-config.yaml:/etc/storage-gateway/config.yaml
     environment:
-      - DATABASE_URL=postgres://storage-gateway:password@postgres:5432/storage_gateway_dev
       - USER_ID=${HOST_UID:-1000}
       - GROUP_ID=${HOST_GID:-1000}
     depends_on:
