@@ -1,12 +1,14 @@
 version: "3.8"
 services:
   storage-gateway:
+    container_name: storage-gateway
     build:
       context: ../storage-gateway/
       dockerfile: ../storage-gateway/Dockerfile.dev
+    command: cargo watch -x run
     volumes:
       - ../storage-gateway:/usr/src/storage-gateway
-      - ../example-secrets/storage-gateway-config.yaml:/etc/storage-gateway/config.yaml
+      - ./storage-gateway-config.yaml:/etc/storage-gateway/config.yaml
     environment:
       - USER_ID=${HOST_UID:-1000}
       - GROUP_ID=${HOST_GID:-1000}
@@ -17,18 +19,16 @@ services:
       - storage-gateway-network
 
   postgres:
+    container_name: postgres
     image: postgres:13
     environment:
-      POSTGRES_DB: storage_gateway_dev
-      POSTGRES_USER: storage_gateway
+      POSTGRES_USER: pgadmin
       POSTGRES_PASSWORD: password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ../pgdata:/var/lib/postgresql/data
+      - ./pg-init-storage-gateway.sh:/docker-entrypoint-initdb.d/pg-init-storage-gateway.sh
     networks:
       - storage-gateway-network
-
-volumes:
-  postgres_data:
 
 networks:
   storage-gateway-network:

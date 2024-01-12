@@ -38,3 +38,11 @@ if [ -z "$result" ]; then
 fi
 
 log "OK" "Verified access to GCS bucket gs://$GCS_BUCKET_NAME"
+
+mkdir -p "$SCRIPT_DIR/../pgdata"
+if [ ! -d "$SCRIPT_DIR/../pgdata" ]; then
+    log "ERROR" "Could not find/access pgdata directory $SCRIPT_DIR/../pgdata"
+    exit 1
+fi
+
+log "OK" "Verified access to pgdata directory $SCRIPT_DIR/../pgdata"

@@ -30,6 +30,8 @@ struct Config {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init();
+    log::info!("Starting server");
+    println!("Starting server 2");
 
     let config_content =
         fs::read_to_string("/etc/storage-gateway/config.yaml").expect("Failed to read config file");
@@ -39,12 +41,24 @@ async fn main() -> std::io::Result<()> {
 
     log::info!("Config:\n{:?}", config);
 
-    let manager = ConnectionManager::<PgConnection>::new(config.database_url);
+    let database_url = format!(
+        "postgres://{}:{}@{}/{}",
+        config.database_username,
+        config.database_password,
+        config.database_host,
+        config.database_name
+    );
+    log::info!("database_url: {}", database_url);
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
     let pool: r2d2::Pool<ConnectionManager<PgConnection>> = r2d2::Pool::builder()
         .build(manager)
         .expect("Failed to create pool.");
 
     HttpServer::new(move || {
+        // This closure runs for every worker thread,
+        // so if we log in here, we'll expect to see it appear
+        // 24 times (assuming 24 workers).
+
         let cors = match config.app_env {
             ref x if x == "dev" => Cors::default()
                 .allow_any_origin()
@@ -59,8 +73,6 @@ async fn main() -> std::io::Result<()> {
                 .max_age(3600),
             _ => panic!("APP_ENV must be set to either 'dev' or 'prod'"),
         };
-
-        log::info!("cors: {:?}", cors);
 
         App::new().wrap(cors).app_data(web::Data::new(pool.clone()))
         // .service(
@@ -78,7 +90,7 @@ async fn main() -> std::io::Result<()> {
         // )
         // .service(actix_files::Files::new("/", "/track/server/static/client/").index_file("index.html"))
     })
-    .bind(format!("{}:{}", config.ip_address, config.port))?
+    .bind(format!("{}:{}", config.bind_address, config.bind_port))?
     .run()
     .await
 }

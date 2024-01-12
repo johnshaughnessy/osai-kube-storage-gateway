@@ -44,7 +44,7 @@ Best for long-term digital preservation of data accessed less than once a year
 
 
 
-** TODO Configure GCS Buckets
+** DONE Configure GCS Buckets
 
  Create buckets in GCS, setting appropriate locations and permissions.
 

@@ -17,7 +17,22 @@ WORKDIR /usr/src/storage-gateway
 
 RUN cargo install cargo-watch
 
+# Copy the Cargo.toml and Cargo.lock files to cache dependencies
+COPY Cargo.toml Cargo.toml
+COPY Cargo.lock Cargo.lock
+
+# Build the dependencies
+RUN mkdir src && \
+    echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs && \
+    cargo build && \
+    rm -rf src
+
+# Copy the source code
 COPY . .
 
+# Build the application
 RUN cargo build
+
+ENV RUST_LOG=info
+
 CMD ["cargo", "watch", "-x", "run"]

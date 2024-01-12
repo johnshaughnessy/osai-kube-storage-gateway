@@ -1,0 +1,7 @@
+database_host: postgres
+database_name: storage_gateway_db
+database_username: storage_gateway_role
+database_password: password
+bind_address: "0.0.0.0"
+bind_port: 7010
+app_env: dev
