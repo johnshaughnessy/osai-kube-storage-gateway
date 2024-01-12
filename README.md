@@ -29,3 +29,18 @@ dc ps
 dc logs -f
 dc down
 ```
+
+# Database setup and migrations
+
+The database is not automatically created. Instead, a container called `migration-runner` is set up to do this. For first time, setup:
+
+- Bring up the dev environment: `dc up -d`
+- The `storage-gateway` logs will have errors about not being able to connect to the database. This is expected.
+- Connect to the `migration-runner` container: `dc exec migration-runner bash`
+- Inside `migration-runner`, run `source ./migration-runner-set-env.sh` to configure the `DATABASE_URL` environment variable.
+- Inside `migration-runner`, run `diesel database setup` to create the database.
+- Restart `storage-gateway` to get it to reconnect.
+
+You can use `migration-runner` to run migrations manually. You may need to shut down `storage-gateway` first, because `postgres` may disallow certain operations if there are active connections to the database.
+
+After bringing up the dev environment (`dc up -d`), connect to the `migration-runner` container and run:
