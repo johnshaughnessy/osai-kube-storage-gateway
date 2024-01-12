@@ -1,5 +1,23 @@
 version: "3.8"
 services:
+  migration-runner:
+    container_name: migration-runner
+    build:
+      context: ../storage-gateway/
+      dockerfile: ../storage-gateway/Dockerfile.migration-runner
+    command: sleep infinity
+    volumes:
+      - ../storage-gateway:/usr/src/storage-gateway
+      - ./storage-gateway-config.yaml:/etc/storage-gateway/config.yaml
+      - ./migration-runner-set-env.sh:/usr/src/storage-gateway/migration-runner-set-env.sh
+    environment:
+      - USER_ID=${HOST_UID:-1000}
+      - GROUP_ID=${HOST_GID:-1000}
+    depends_on:
+      - postgres
+    networks:
+      - storage-gateway-network
+
   storage-gateway:
     container_name: storage-gateway
     build:
@@ -14,7 +32,6 @@ services:
       - GROUP_ID=${HOST_GID:-1000}
     depends_on:
       - postgres
-
     networks:
       - storage-gateway-network
 

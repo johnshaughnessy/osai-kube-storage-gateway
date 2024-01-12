@@ -1,0 +1,7 @@
+# Base stage
+FROM rust:1.75-slim-buster
+WORKDIR /usr/src/storage-gateway
+RUN apt-get update && apt-get install -y build-essential libpq-dev
+RUN cargo install diesel_cli --no-default-features --features postgres
+
+COPY ./migrations ./migrations
