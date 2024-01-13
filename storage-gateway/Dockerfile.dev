@@ -9,6 +9,7 @@ RUN groupadd -g ${HOST_GID} appuser && \
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    libssl-dev \
     pkg-config \
     curl \
     && rm -rf /var/lib/apt/lists/*

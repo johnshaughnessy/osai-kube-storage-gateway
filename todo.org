@@ -46,13 +46,6 @@ Best for long-term digital preservation of data accessed less than once a year
 
  Create buckets in GCS, setting appropriate locations and permissions.
 
-** TODO Don't forget about --locked-schema in production
-
-Use this diesel config in production.
-
-      --locked-schema
-          When `print_schema.file` is specified in your config file, this flag will cause Diesel CLI to error if any command would result in changes to that file. It is recommended that you use this flag when running migrations in CI or production.
-
 ** TODO Add write GCS object API (no auth)
 ** TODO Add read GCS object API (no auth)
 ** TODO Build/upload to artifact registry
@@ -66,3 +59,9 @@ Use this diesel config in production.
 ** TODO Create migration(s) for objects
 ** TODO Add auth to read/write APIs (stubbed tokens in dev)
 ** TODO Add auth for prod keycloak tokens
+** TODO Don't forget about --locked-schema in production
+
+Use this diesel config in production.
+
+      --locked-schema
+          When `print_schema.file` is specified in your config file, this flag will cause Diesel CLI to error if any command would result in changes to that file. It is recommended that you use this flag when running migrations in CI or production.

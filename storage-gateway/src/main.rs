@@ -1,8 +1,9 @@
 extern crate diesel;
 
 use actix_cors::Cors;
-use actix_files;
+// use actix_files;
 use actix_web::{http, web, App, HttpServer};
+use cloud_storage::{Client, ListRequest};
 use diesel::r2d2::{self, ConnectionManager};
 use diesel::PgConnection;
 
@@ -13,6 +14,20 @@ mod api;
 
 #[cfg(test)]
 mod tests;
+
+use futures::stream::StreamExt;
+use thiserror::Error; // import StreamExt trait
+
+#[derive(Error, Debug)]
+pub enum MyError {
+    #[error("IO error")]
+    Io(#[from] std::io::Error),
+
+    //#[error("Cloud storage error")]
+    //CloudStorage(#[from] cloud_storage::Error),
+    #[error("Cloud storage error")]
+    CloudStorage(#[from] cloud_storage::Error),
+}
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -25,13 +40,27 @@ struct Config {
     bind_port: u16,
 
     app_env: String,
+    gcs_bucket_name: String,
 }
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> std::result::Result<(), std::io::Error> {
+    // Manual error handling
+    if let Err(e) = run_app().await {
+        // Log the error and return an io::Error
+        log::error!("Application error: {}", e);
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            e.to_string(),
+        ));
+    }
+
+    Ok(())
+}
+
+async fn run_app() -> Result<(), MyError> {
     env_logger::init();
     log::info!("Starting server");
-    println!("Starting server 2");
 
     let config_content =
         fs::read_to_string("/etc/storage-gateway/config.yaml").expect("Failed to read config file");
@@ -39,8 +68,35 @@ async fn main() -> std::io::Result<()> {
     let config: Config =
         serde_yaml::from_str(&config_content).expect("Failed to parse config file");
 
-    log::info!("Config:\n{:?}", config);
+    let service_account_file = std::env::var("SERVICE_ACCOUNT").unwrap();
+    let service_account_file_content =
+        fs::read_to_string(service_account_file).expect("Failed to read service account file");
 
+    log::info!("Reading from cloud storage");
+    let bucket_name = "ocho-osai"; //&config.gcs_bucket_name;
+    log::info!("bucket_name: {}", bucket_name);
+    let client = Client::default();
+    let all_objects_stream = client
+        .object()
+        .list(bucket_name, ListRequest::default())
+        .await?;
+
+    // Use collect to gather all objects into a Vec
+    let all_objects: Vec<_> = all_objects_stream.collect().await;
+
+    for object_result in all_objects {
+        match object_result {
+            Ok(object_list) => {
+                for object in object_list.items {
+                    log::info!("object: {:?}", object.name);
+                }
+            }
+            Err(e) => {
+                // Handle error
+                log::error!("Error listing objects: {}", e);
+            }
+        }
+    }
     let database_url = format!(
         "postgres://{}:{}@{}/{}",
         config.database_username,
@@ -92,5 +148,7 @@ async fn main() -> std::io::Result<()> {
     })
     .bind(format!("{}:{}", config.bind_address, config.bind_port))?
     .run()
-    .await
+    .await;
+
+    Ok(())
 }

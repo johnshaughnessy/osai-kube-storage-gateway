@@ -27,9 +27,11 @@ services:
     volumes:
       - ../storage-gateway:/usr/src/storage-gateway
       - ./storage-gateway-config.yaml:/etc/storage-gateway/config.yaml
+      - /home/john/.keys/hubs-dev-333333-8a27003a8831.json:/etc/storage-gateway/service-account.json
     environment:
       - USER_ID=${HOST_UID:-1000}
       - GROUP_ID=${HOST_GID:-1000}
+      - SERVICE_ACCOUNT=/etc/storage-gateway/service-account.json
     depends_on:
       - postgres
     networks:

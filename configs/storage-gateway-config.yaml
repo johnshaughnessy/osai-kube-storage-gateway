@@ -5,3 +5,4 @@ database_password: password
 bind_address: "0.0.0.0"
 bind_port: 7010
 app_env: dev
+gcs_bucket_name: gs://ocho-osai
