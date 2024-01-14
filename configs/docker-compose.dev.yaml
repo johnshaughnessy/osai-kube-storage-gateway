@@ -17,6 +17,7 @@ services:
       - postgres
     networks:
       - storage-gateway-network
+    user: ${HOST_UID:-1000}:${HOST_GID:-1000}
 
   storage-gateway:
     container_name: storage-gateway
@@ -36,6 +37,7 @@ services:
       - postgres
     networks:
       - storage-gateway-network
+    user: ${HOST_UID:-1000}:${HOST_GID:-1000}
 
   postgres:
     container_name: postgres

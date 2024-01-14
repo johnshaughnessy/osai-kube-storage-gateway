@@ -6,6 +6,7 @@ ARG HOST_GID=1000
 RUN groupadd -g ${HOST_GID} appuser && \
     useradd -m -u ${HOST_UID} -g appuser appuser
 
+
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
@@ -13,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     curl \
     && rm -rf /var/lib/apt/lists/*
+
+USER appuser
 
 WORKDIR /usr/src/storage-gateway
 

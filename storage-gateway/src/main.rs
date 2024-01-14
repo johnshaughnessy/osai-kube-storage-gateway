@@ -1,7 +1,6 @@
 extern crate diesel;
 
 use actix_cors::Cors;
-// use actix_files;
 use actix_web::{http, web, App, HttpServer};
 use cloud_storage::{Client, ListRequest};
 use diesel::r2d2::{self, ConnectionManager};
