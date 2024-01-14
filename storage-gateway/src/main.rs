@@ -2,7 +2,8 @@ extern crate diesel;
 
 use actix_cors::Cors;
 use actix_web::{http, web, App, HttpServer};
-use cloud_storage::{Client, ListRequest};
+use cloud_storage::bucket::{Location, NALocation, SingleRegion};
+use cloud_storage::{Client, ListRequest, NewBucket};
 use diesel::r2d2::{self, ConnectionManager};
 use diesel::PgConnection;
 
@@ -26,10 +27,14 @@ pub enum MyError {
     //CloudStorage(#[from] cloud_storage::Error),
     #[error("Cloud storage error")]
     CloudStorage(#[from] cloud_storage::Error),
+
+    // Create a custom error type with a string message
+    #[error("Custom error: {0}")]
+    Custom(String),
 }
 
-#[derive(Debug, Deserialize)]
-struct Config {
+#[derive(Clone, Debug, Deserialize)]
+pub struct Config {
     database_host: String,
     database_name: String,
     database_username: String,
@@ -40,6 +45,7 @@ struct Config {
 
     app_env: String,
     gcs_bucket_name: String,
+    gcs_bucket_subdirectory: String,
 }
 
 #[actix_web::main]
@@ -74,28 +80,27 @@ async fn run_app() -> Result<(), MyError> {
     log::info!("Reading from cloud storage");
     let bucket_name = &config.gcs_bucket_name;
     log::info!("bucket_name: {}", bucket_name);
+
     let client = Client::default();
     let all_objects_stream = client
         .object()
         .list(bucket_name, ListRequest::default())
         .await?;
-
-    // Use collect to gather all objects into a Vec
     let all_objects: Vec<_> = all_objects_stream.collect().await;
 
+    // Filter objects by gcs_bucket_subdirectory
     for object_result in all_objects {
-        match object_result {
-            Ok(object_list) => {
-                for object in object_list.items {
+        if let Ok(object_list) = object_result {
+            for object in object_list.items {
+                if object.name.starts_with(&config.gcs_bucket_subdirectory) {
                     log::info!("object: {:?}", object.name);
+                    // Pretty print the object
+                    // log::info!("{:#?}", object);
                 }
-            }
-            Err(e) => {
-                // Handle error
-                log::error!("Error listing objects: {}", e);
             }
         }
     }
+
     let database_url = format!(
         "postgres://{}:{}@{}/{}",
         config.database_username,
@@ -109,6 +114,7 @@ async fn run_app() -> Result<(), MyError> {
         .build(manager)
         .expect("Failed to create pool.");
 
+    let config_clone = config.clone();
     HttpServer::new(move || {
         // This closure runs for every worker thread,
         // so if we log in here, we'll expect to see it appear
@@ -129,7 +135,11 @@ async fn run_app() -> Result<(), MyError> {
             _ => panic!("APP_ENV must be set to either 'dev' or 'prod'"),
         };
 
-        App::new().wrap(cors).app_data(web::Data::new(pool.clone()))
+        App::new()
+            .wrap(cors)
+            .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(config.clone()))
+            .route("/{file_name:.*}", web::get().to(download_and_send_file))
         // .service(
         //     web::scope("/api")
         //         .service(
@@ -145,9 +155,42 @@ async fn run_app() -> Result<(), MyError> {
         // )
         // .service(actix_files::Files::new("/", "/track/server/static/client/").index_file("index.html"))
     })
-    .bind(format!("{}:{}", config.bind_address, config.bind_port))?
+    .bind(format!(
+        "{}:{}",
+        config_clone.bind_address, config_clone.bind_port
+    ))?
     .run()
     .await;
 
     Ok(())
+}
+
+use actix_web::{HttpResponse, Responder, Result};
+
+pub async fn download_and_send_file(
+    config: web::Data<Config>,
+    file_name: web::Path<String>,
+) -> Result<impl Responder> {
+    let client = Client::default();
+
+    let full_file_name = format!("{}/{}", config.gcs_bucket_subdirectory, file_name);
+
+    log::info!("full_file_name: {}", full_file_name);
+
+    let object_result = client
+        .object()
+        .download(&config.gcs_bucket_name, &full_file_name)
+        .await;
+
+    log::info!("object_result: {:?}", object_result);
+
+    match object_result {
+        Ok(bytes) => Ok(HttpResponse::Ok()
+            .content_type("application/octet-stream")
+            .body(bytes)),
+        Err(e) => {
+            log::error!("Error downloading file: {}", e);
+            Ok(HttpResponse::InternalServerError().body("Internal Server Error"))
+        }
+    }
 }
