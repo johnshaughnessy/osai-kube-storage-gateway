@@ -27,6 +27,10 @@ services:
     command: cargo watch -x run
     volumes:
       - ../storage-gateway:/usr/src/storage-gateway
+      # Create a separate volume for the build directory so that the host's copy of cargo
+      # doesn't interfere with the container. For example, I have an emacs plugin that
+      # runs cargo check on save, which slows down the build in the container.
+      - ../storage-gateway/container-target:/usr/src/storage-gateway/target
       - ./storage-gateway-config.yaml:/etc/storage-gateway/config.yaml
       - /home/john/.keys/hubs-dev-333333-8a27003a8831.json:/etc/storage-gateway/service-account.json
     environment:

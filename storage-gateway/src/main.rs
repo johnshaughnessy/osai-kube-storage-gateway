@@ -72,7 +72,7 @@ async fn run_app() -> Result<(), MyError> {
         fs::read_to_string(service_account_file).expect("Failed to read service account file");
 
     log::info!("Reading from cloud storage");
-    let bucket_name = "ocho-osai"; //&config.gcs_bucket_name;
+    let bucket_name = &config.gcs_bucket_name;
     log::info!("bucket_name: {}", bucket_name);
     let client = Client::default();
     let all_objects_stream = client
